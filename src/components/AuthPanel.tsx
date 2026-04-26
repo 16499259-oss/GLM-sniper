@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { cn, createLog } from '../lib/utils';
+import { API_BASE_URL } from '../lib/config';
 import type { LogEntry } from '../lib/config';
 
 interface AuthPanelProps {
@@ -20,7 +21,7 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
     onLog(createLog('info', '正在验证认证信息...'));
 
     try {
-      const resp = await fetch('http://localhost:3100/proxy/api/biz/subscription/list', {
+      const resp = await fetch(`${API_BASE_URL}/api/biz/subscription/list`, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',

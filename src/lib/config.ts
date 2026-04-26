@@ -25,6 +25,10 @@ export interface SniperConfig {
   retryInterval: number; // ms
 }
 
+// API 服务地址配置
+// 生产环境通过 VITE_API_BASE_URL 环境变量配置
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3100';
+
 export const PLANS: Record<PlanType, PlanConfig> = {
   lite: {
     type: 'lite',

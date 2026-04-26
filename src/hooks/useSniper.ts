@@ -5,7 +5,7 @@ import type {
   SniperStatus,
   LogEntry,
 } from '../lib/config';
-import { PLANS, getDefaultProductId } from '../lib/config';
+import { PLANS, getDefaultProductId, API_BASE_URL } from '../lib/config';
 import { createLog, getTargetDateTime } from '../lib/utils';
 
 // 库存状态接口
@@ -79,7 +79,7 @@ export function useSniper(): UseSniperReturn {
     addLog(createLog('info', `[浏览器模式] 目标: ${PLANS[plan].name} 套餐`));
 
     try {
-      const resp = await fetch('http://localhost:3100/api/sniper/browser', {
+      const resp = await fetch(`${API_BASE_URL}/api/sniper/browser`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -105,7 +105,7 @@ export function useSniper(): UseSniperReturn {
     }
   }, [plan, cookies, targetDate, targetTime, addLog]);
 
-  const PROXY_BASE = 'http://localhost:3100/proxy/api';
+  const PROXY_BASE = `${API_BASE_URL}/proxy/api`;
 
   // API mode - direct HTTP requests via proxy to bypass CORS
   const executeApiSniper = useCallback(async () => {
@@ -318,7 +318,7 @@ export function useSniper(): UseSniperReturn {
   // 检查库存状态
   const checkStock = useCallback(async () => {
     try {
-      const resp = await fetch('http://localhost:3100/api/stock/status');
+      const resp = await fetch(`${API_BASE_URL}/api/stock/status`);
       if (resp.ok) {
         const data = await resp.json();
         if (data.success && data.parsed) {
