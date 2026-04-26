@@ -13,20 +13,15 @@ module.exports = {
       autorestart: true,
       max_restarts: 10,
       restart_delay: 3000,
-      error_file: '/opt/glm-sniper/logs/server-error.log',
-      out_file: '/opt/glm-sniper/logs/server-out.log',
-      log_file: '/opt/glm-sniper/logs/server-combined.log',
       time: true
     },
     {
       name: 'glm-sniper-front',
-      script: 'serve',
-      args: '-s dist -l 5001',
+      script: 'npx',
+      args: 'serve -s dist -l 5001',
       cwd: '/opt/glm-sniper',
       watch: false,
       autorestart: true,
-      error_file: '/opt/glm-sniper/logs/front-error.log',
-      out_file: '/opt/glm-sniper/logs/front-out.log',
       time: true
     }
   ]

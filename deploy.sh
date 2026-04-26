@@ -51,26 +51,21 @@ fi
 echo "安装 npm 依赖..."
 npm install
 
-# === 5. 安装 serve（用于静态文件服务）===
-npm install -g serve
-
-# === 6. 创建环境变量文件 ===
+# === 5. 创建环境变量文件 ===
 echo "创建环境变量..."
 cat > .env.production << EOF
 VITE_API_BASE_URL=http://localhost:$BACKEND_PORT
 EOF
 
-# === 7. 构建前端 ===
+# === 6. 构建前端 ===
 echo "构建前端应用..."
 npm run build
 
-# === 8. 安装 PM2 ===
-if ! command -v pm2 &> /dev/null; then
-    echo "安装 PM2..."
-    npm install -g pm2
-fi
+# === 7. 安装 pm2 到项目本地（更可靠）===
+echo "安装 PM2..."
+npm install pm2 serve
 
-# === 9. 创建 PM2 配置 ===
+# === 8. 创建 PM2 配置 ===
 cat > ecosystem.config.js << EOF
 module.exports = {
   apps: [
@@ -86,38 +81,40 @@ module.exports = {
       watch: false,
       autorestart: true,
       max_restarts: 10,
-      restart_delay: 3000
+      restart_delay: 3000,
+      time: true
     },
     {
       name: 'glm-sniper-front',
-      script: 'serve',
-      args: '-s dist -l $FRONTEND_PORT',
+      script: 'npx',
+      args: 'serve -s dist -l $FRONTEND_PORT',
       cwd: '$PROJECT_DIR',
       watch: false,
-      autorestart: true
+      autorestart: true,
+      time: true
     }
   ]
 };
 EOF
 
-# === 10. 停止旧服务（如果存在） ===
+# === 9. 停止旧服务（如果存在） ===
 echo "停止旧服务..."
-pm2 delete glm-sniper-server 2>/dev/null || true
-pm2 delete glm-sniper-front 2>/dev/null || true
+npx pm2 delete glm-sniper-server 2>/dev/null || true
+npx pm2 delete glm-sniper-front 2>/dev/null || true
 
-# === 11. 启动服务 ===
+# === 10. 启动服务 ===
 echo "启动服务..."
-pm2 start ecosystem.config.js
+npx pm2 start ecosystem.config.js
 
-# === 12. 设置开机自启 ===
+# === 11. 设置开机自启 ===
 echo "设置开机自启..."
-pm2 save
-PM2_STARTUP=$(pm2 startup | grep "sudo" | head -1)
+npx pm2 save
+PM2_STARTUP=$(npx pm2 startup | grep "sudo" | head -1)
 if [ -n "$PM2_STARTUP" ]; then
     eval "$PM2_STARTUP"
 fi
 
-# === 13. 验证 ===
+# === 12. 验证 ===
 sleep 3
 echo ""
 echo "=========================================="
@@ -135,14 +132,14 @@ echo ""
 echo "=========================================="
 echo "常用管理命令:"
 echo "=========================================="
-echo "  pm2 status              # 查看服务状态"
-echo "  pm2 logs                # 查看日志"
-echo "  pm2 logs glm-sniper-server  # 查看后端日志"
-echo "  pm2 restart all         # 重启所有服务"
-echo "  pm2 restart glm-sniper-server  # 重启后端"
-echo "  pm2 stop all            # 停止所有服务"
-echo "  pm2 start all           # 启动所有服务"
-echo "  pm2 monit               # 实时监控"
+echo "  npx pm2 status              # 查看服务状态"
+echo "  npx pm2 logs                # 查看日志"
+echo "  npx pm2 logs glm-sniper-server  # 查看后端日志"
+echo "  npx pm2 restart all         # 重启所有服务"
+echo "  npx pm2 restart glm-sniper-server  # 重启后端"
+echo "  npx pm2 stop all            # 停止所有服务"
+echo "  npx pm2 start all           # 启动所有服务"
+echo "  npx pm2 monit               # 实时监控"
 echo "=========================================="
 echo ""
-pm2 status
+npx pm2 status
