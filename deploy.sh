@@ -66,7 +66,7 @@ echo "安装 PM2..."
 npm install pm2 serve
 
 # === 8. 创建 PM2 配置 ===
-cat > ecosystem.config.js << EOF
+cat > ecosystem.config.cjs << EOF
 module.exports = {
   apps: [
     {
@@ -104,7 +104,7 @@ npx pm2 delete glm-sniper-front 2>/dev/null || true
 
 # === 10. 启动服务 ===
 echo "启动服务..."
-npx pm2 start ecosystem.config.js
+npx pm2 start ecosystem.config.cjs
 
 # === 11. 设置开机自启 ===
 echo "设置开机自启..."
