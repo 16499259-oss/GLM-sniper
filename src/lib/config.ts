@@ -71,7 +71,6 @@ export const PRODUCT_IDS: Record<PlanType, Record<string, string>> = {
 export const getDefaultProductId = (plan: PlanType): string => {
   return PRODUCT_IDS[plan]?.quarterly || PRODUCT_IDS.pro.quarterly;
 };
-
 // 库存检查相关配置
 export const STOCK_CHECK_IDS = {
   stockStatus: '1111',      // 库存状态
@@ -99,5 +98,3 @@ export const API_ENDPOINTS = {
   tokenMagnitude: '/biz/customer/getTokenMagnitude',
   customerInfo: '/biz/customer/getCustomerInfo',
 };
-
-export const AES_KEY = 'zhiPuAi123456789';

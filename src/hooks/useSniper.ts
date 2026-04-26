@@ -105,7 +105,7 @@ export function useSniper(): UseSniperReturn {
     }
   }, [plan, cookies, targetDate, targetTime, addLog]);
 
-  const PROXY_BASE = 'http://localhost:3100/proxy';
+  const PROXY_BASE = 'http://localhost:3100/proxy/api';
 
   // API mode - direct HTTP requests via proxy to bypass CORS
   const executeApiSniper = useCallback(async () => {
