@@ -359,7 +359,7 @@ app.get('/api/health', (_, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-const PORT = 3100;
+const PORT = parseInt(process.env.PORT || '3100', 10);
 app.listen(PORT, () => {
   console.log(`🎯 GLM Sniper Server running on http://localhost:${PORT}`);
   console.log(`📡 API Proxy: http://localhost:${PORT}/proxy/...`);
