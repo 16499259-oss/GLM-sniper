@@ -35,6 +35,8 @@ interface UseSniperReturn {
   clearLogs: () => void;
   start: () => void;
   stop: () => void;
+  // 验证码处理相关
+  resumeAfterCaptcha: () => void;
   // 库存监控相关
   stockStatus: StockStatus | null;
   isMonitoring: boolean;
@@ -159,10 +161,30 @@ export function useSniper(): UseSniperReturn {
             errorText.includes('verify') || errorText.includes('Tencent') ||
             errorText.includes('security') || preOrderResp.status === 403) {
           addLog(createLog('warning', '⚠️ 检测到验证码拦截！'));
-          addLog(createLog('warning', '请前往官网手动完成验证码后重试：'));
-          addLog(createLog('info', 'https://open.bigmodel.cn/glm-coding'));
-          addLog(createLog('warning', '建议：在官网完成拼图验证后，立即点击"重试"按钮'));
-          setStatus('error');
+          addLog(createLog('info', '正在打开浏览器窗口供您处理验证码...'));
+          
+          // 自动打开浏览器窗口
+          try {
+            const browserResp = await fetch(`${API_BASE_URL}/api/sniper/open-browser`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ cookies }),
+            });
+            
+            if (browserResp.ok) {
+              addLog(createLog('success', '✅ 浏览器已打开！请在浏览器中完成拼图验证'));
+              addLog(createLog('info', '💡 完成验证码后，点击下方【验证完成，继续抢购】按钮'));
+              setStatus('captcha_pending');
+            } else {
+              addLog(createLog('error', '打开浏览器失败，请手动前往官网处理验证码'));
+              addLog(createLog('info', 'https://open.bigmodel.cn/glm-coding'));
+              setStatus('error');
+            }
+          } catch (browserErr: any) {
+            addLog(createLog('error', `打开浏览器失败: ${browserErr.message}`));
+            addLog(createLog('warning', '请手动前往官网: https://open.bigmodel.cn/glm-coding'));
+            setStatus('error');
+          }
           return;
         }
 
@@ -371,6 +393,22 @@ export function useSniper(): UseSniperReturn {
     monitoringTimerRef.current = setTimeout(pollStock, 5000);
   }, [checkStock, addLog]);
 
+  // 验证码处理完成后恢复API抢购
+  const resumeAfterCaptcha = useCallback(() => {
+    addLog(createLog('info', '🔄 验证码处理完成，重新开始API抢购...'));
+    addLog(createLog('info', '⏳ 重试次数将重置为0'));
+    
+    // 重置重试次数
+    retryCountRef.current = 0;
+    abortedRef.current = false;
+    
+    // 设置状态为运行中
+    setStatus('running');
+    
+    // 重新执行API抢购
+    executeApiSniper();
+  }, [addLog, executeApiSniper]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -396,6 +434,8 @@ export function useSniper(): UseSniperReturn {
     clearLogs,
     start,
     stop,
+    // 验证码处理
+    resumeAfterCaptcha,
     // 库存监控
     stockStatus,
     isMonitoring,

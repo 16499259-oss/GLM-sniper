@@ -180,6 +180,23 @@ function App() {
                   ⚠ 请先配置 {sniper.mode === 'api' ? 'Auth Token' : 'Cookies'} 才能启动抢购
                 </p>
               )}
+              {/* 验证码处理按钮 - 当状态为 captcha_pending 时显示 */}
+              {sniper.status === 'captcha_pending' && (
+                <div className="mt-4 p-3 rounded-lg border border-warning/30 bg-warning/5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-xs text-warning">
+                      <span className="font-medium">🔐 验证码等待处理</span>
+                      <span className="text-muted-foreground ml-2">请在浏览器中完成验证后点击按钮</span>
+                    </div>
+                    <button
+                      onClick={sniper.resumeAfterCaptcha}
+                      className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      ✅ 验证完成，继续抢购
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

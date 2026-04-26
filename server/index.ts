@@ -1,6 +1,6 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { chromium } from 'playwright';
+import { chromium, Browser } from 'playwright';
 import cookieParse from 'cookie-parse';
 
 const app = express();
@@ -9,7 +9,7 @@ app.use(express.json());
 
 // ===== API Proxy =====
 // Proxy requests to bigmodel.cn to bypass CORS
-app.use('/proxy', async (req, res) => {
+app.use('/proxy', async (req: Request, res: Response) => {
   try {
     const targetUrl = `https://open.bigmodel.cn${req.path}`;
     const headers: Record<string, string> = {
@@ -40,7 +40,7 @@ app.use('/proxy', async (req, res) => {
 });
 
 // ===== Browser Automation Sniper =====
-app.post('/api/sniper/browser', async (req, res) => {
+app.post('/api/sniper/browser', async (req: Request, res: Response) => {
   const { plan, cookies, targetTime } = req.body;
 
   let browser;
@@ -158,8 +158,57 @@ app.post('/api/sniper/browser', async (req, res) => {
   }
 });
 
+// ===== Open Browser for Captcha Handling =====
+// 打开浏览器窗口供用户手动处理验证码，不执行抢购操作
+app.post('/api/sniper/open-browser', async (req: Request, res: Response) => {
+  const { cookies, targetUrl = 'https://open.bigmodel.cn/glm-coding' } = req.body;
+
+  let browser: Browser | null = null;
+  try {
+    browser = await chromium.launch({ headless: false });
+    const context = await browser.newContext();
+
+    // Set cookies if provided
+    if (cookies) {
+      const parsed = cookieParse.parse(cookies);
+      const cookieObjects = Object.entries(parsed).map(([name, value]) => ({
+        name,
+        value: String(value),
+        domain: '.bigmodel.cn',
+        path: '/',
+      }));
+      await context.addCookies(cookieObjects);
+    }
+
+    const page = await context.newPage();
+    await page.goto(targetUrl, { waitUntil: 'networkidle' });
+
+    // 浏览器保持打开，等待用户手动处理验证码
+    // 用户完成后需在前端点击"验证完成"按钮
+    console.log('[Open Browser] Browser opened for captcha handling, waiting for user action...');
+
+    // 不关闭浏览器，让用户可以操作
+    // 浏览器会在一定时间后自动超时关闭，或者用户手动关闭
+    // 设置30分钟后自动关闭作为安全措施
+    setTimeout(async () => {
+      try {
+        if (browser) await browser.close();
+        console.log('[Open Browser] Browser auto-closed after timeout');
+      } catch {}
+    }, 30 * 60 * 1000);
+
+    res.json({
+      success: true,
+      message: '浏览器已打开，请完成验证码后点击"验证完成"按钮',
+    });
+  } catch (err: any) {
+    if (browser) await browser.close();
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // ===== API Mode Sniper =====
-app.post('/api/sniper/api', async (req, res) => {
+app.post('/api/sniper/api', async (req: Request, res: Response) => {
   const { plan, authToken, targetTime, paymentType = 'alipay' } = req.body;
 
   const BASE = 'https://open.bigmodel.cn/api';
@@ -250,7 +299,7 @@ app.post('/api/sniper/api', async (req, res) => {
 });
 
 // ===== Stock Status Check =====
-app.get('/api/stock/status', async (req, res) => {
+app.get('/api/stock/status', async (req: Request, res: Response) => {
   try {
     // 查询库存状态
     const stockUrl = 'https://open.bigmodel.cn/api/biz/operation/query?ids=1111';
@@ -355,7 +404,7 @@ app.get('/api/stock/status', async (req, res) => {
 });
 
 // Health check
-app.get('/api/health', (_, res) => {
+app.get('/api/health', (_: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

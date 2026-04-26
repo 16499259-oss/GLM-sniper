@@ -5,7 +5,7 @@ export type { LogLevel, LogEntry };
 
 export type SniperMode = 'browser' | 'api';
 export type PlanType = 'lite' | 'pro' | 'max';
-export type SniperStatus = 'idle' | 'countdown' | 'running' | 'success' | 'error';
+export type SniperStatus = 'idle' | 'countdown' | 'running' | 'captcha_pending' | 'success' | 'error';
 
 export interface PlanConfig {
   type: PlanType;
