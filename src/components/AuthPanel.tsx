@@ -21,7 +21,7 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
     onLog(createLog('info', '正在验证认证信息...'));
 
     try {
-      const resp = await fetch(`${API_BASE_URL}/api/biz/subscription/list`, {
+      const resp = await fetch(`${API_BASE_URL}/proxy/api/biz/subscription/list`, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',
