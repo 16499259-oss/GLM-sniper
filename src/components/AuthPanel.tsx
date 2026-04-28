@@ -21,11 +21,26 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
     onLog(createLog('info', '正在验证认证信息...'));
 
     try {
+      // 构建请求头
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // 支持 Token 或 Cookies 认证
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+        onLog(createLog('info', '使用 Token 认证'));
+      } else if (cookies) {
+        headers['Cookie'] = cookies;
+        onLog(createLog('info', '使用 Cookies 认证'));
+      } else {
+        onLog(createLog('error', '请输入 Token 或 Cookies'));
+        setIsValidating(false);
+        return;
+      }
+
       const resp = await fetch(`${API_BASE_URL}/proxy/api/biz/subscription/list`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (resp.ok) {
@@ -34,8 +49,8 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
       } else {
         onLog(createLog('error', `认证失效 - HTTP ${resp.status}`));
       }
-    } catch (err) {
-      onLog(createLog('warning', '无法验证认证（可能需要配置代理）'));
+    } catch (err: any) {
+      onLog(createLog('warning', `无法验证认证: ${err.message}`));
     } finally {
       setIsValidating(false);
     }
@@ -99,7 +114,7 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
         <div className="flex gap-2">
           <button
             onClick={handleValidate}
-            disabled={disabled || !authToken || isValidating}
+            disabled={disabled || (!authToken && !cookies) || isValidating}
             className={cn(
               'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200',
               'border border-border bg-secondary/50 text-secondary-foreground',
@@ -111,7 +126,7 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
             {isValidating ? '验证中...' : '验证 Token'}
           </button>
           <span className="text-[10px] text-muted-foreground self-center">
-            从浏览器 DevTools → Network → 请求头中获取 Authorization
+            Token 或 Cookies 二选一，优先使用 Token
           </span>
         </div>
       </div>

@@ -13,7 +13,9 @@ function App() {
   const sniper = useSniper();
   const isRunning = sniper.status === 'running' || sniper.status === 'countdown';
   const isBusy = isRunning || sniper.isMonitoring;
-  const canStart = sniper.mode === 'api' ? !!sniper.authToken : !!sniper.cookies;
+  const canStart = sniper.mode === 'api'
+    ? (!!sniper.authToken || !!sniper.cookies)
+    : !!sniper.cookies;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

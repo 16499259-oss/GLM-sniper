@@ -114,16 +114,25 @@ export function useSniper(): UseSniperReturn {
     addLog(createLog('info', `[API模式] 开始执行抢购流程...`));
     addLog(createLog('info', `[API模式] 目标: ${PLANS[plan].name} 套餐`));
 
-    if (!authToken) {
-      addLog(createLog('error', `[API模式] 缺少认证 Token，请先配置`));
+    // 检查认证：Token 或 Cookies 必须有一个
+    if (!authToken && !cookies) {
+      addLog(createLog('error', `[API模式] 缺少认证，请先配置 Token 或 Cookies`));
       setStatus('error');
       return;
     }
 
+    // 构建请求头：支持 Token 或 Cookies
     const headers: Record<string, string> = {
-      'Authorization': `Bearer ${authToken}`,
       'Content-Type': 'application/json',
     };
+
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+      addLog(createLog('info', `[认证方式] Bearer Token`));
+    } else if (cookies) {
+      headers['Cookie'] = cookies;
+      addLog(createLog('info', `[认证方式] Cookies`));
+    }
 
     try {
       // Step 1: Check if limited
@@ -189,9 +198,10 @@ export function useSniper(): UseSniperReturn {
         }
 
         retryCountRef.current++;
-        if (retryCountRef.current < 5 && !abortedRef.current) {
-          addLog(createLog('warning', `[重试] 第 ${retryCountRef.current} 次重试，间隔 1 秒...`));
-          setTimeout(() => executeApiSniper(), 1000);
+        // 持续重试直到成功或手动停止
+        if (!abortedRef.current) {
+          addLog(createLog('warning', `[重试] 第 ${retryCountRef.current} 次重试，间隔 2 秒...`));
+          setTimeout(() => executeApiSniper(), 2000);
           return;
         }
         setStatus('error');
@@ -290,11 +300,11 @@ export function useSniper(): UseSniperReturn {
       addLog(createLog('info', `倒计时 ${Math.ceil(delay / 1000)} 秒后开始抢购...`));
       setStatus('countdown');
 
-      // Start countdown - execute 2 seconds early to compensate for network latency
-      const executeDelay = Math.max(0, delay - 2000);
+      // Start countdown - execute 5 seconds early to compensate for network latency
+      const executeDelay = Math.max(0, delay - 5000);
       timerRef.current = setTimeout(() => {
         if (!abortedRef.current) {
-          addLog(createLog('warning', '⏰ 提前 2 秒发起请求（补偿网络延迟）...'));
+          addLog(createLog('warning', '⏰ 提前 5 秒发起请求（补偿网络延迟）...'));
           setStatus('running');
           if (mode === 'browser') {
             executeBrowserSniper();
