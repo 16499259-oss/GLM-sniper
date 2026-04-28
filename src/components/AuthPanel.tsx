@@ -28,7 +28,7 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
     }
 
     try {
-      // 构建请求头：支持 Token 和 Cookies 同时使用
+      // 构建请求头：优先级：Token > Cookies
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -36,13 +36,9 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
         onLog(createLog('info', '使用 Token 认证'));
-      }
-      if (cookies) {
+      } else if (cookies) {
         headers['Cookie'] = cookies;
         onLog(createLog('info', '使用 Cookies 认证'));
-      }
-      if (authToken && cookies) {
-        onLog(createLog('info', 'Token + Cookies 同时使用'));
       }
 
       const resp = await fetch(`${API_BASE_URL}/proxy/api/biz/subscription/list`, {

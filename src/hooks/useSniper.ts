@@ -121,21 +121,17 @@ export function useSniper(): UseSniperReturn {
       return;
     }
 
-    // 构建请求头：支持 Token 和 Cookies 同时使用
+    // 构建请求头：优先级：Token > Cookies
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
-      addLog(createLog('info', `[认证方式] Bearer Token`));
-    }
-    if (cookies) {
+      addLog(createLog('info', '[认证方式] Bearer Token'));
+    } else if (cookies) {
       headers['Cookie'] = cookies;
-      addLog(createLog('info', `[认证方式] + Cookies`));
-    }
-    if (authToken && cookies) {
-      addLog(createLog('info', `[认证方式] Token + Cookies 同时使用`));
+      addLog(createLog('info', '[认证方式] Cookies'));
     }
 
     try {
