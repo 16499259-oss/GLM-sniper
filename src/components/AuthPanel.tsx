@@ -20,23 +20,29 @@ export function AuthPanel({ authToken, onTokenChange, cookies, onCookiesChange, 
     setIsValidating(true);
     onLog(createLog('info', '正在验证认证信息...'));
 
+    // 至少需要一个认证方式
+    if (!authToken && !cookies) {
+      onLog(createLog('error', '请输入 Token 或 Cookies'));
+      setIsValidating(false);
+      return;
+    }
+
     try {
-      // 构建请求头
+      // 构建请求头：支持 Token 和 Cookies 同时使用
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
 
-      // 支持 Token 或 Cookies 认证
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
         onLog(createLog('info', '使用 Token 认证'));
-      } else if (cookies) {
+      }
+      if (cookies) {
         headers['Cookie'] = cookies;
         onLog(createLog('info', '使用 Cookies 认证'));
-      } else {
-        onLog(createLog('error', '请输入 Token 或 Cookies'));
-        setIsValidating(false);
-        return;
+      }
+      if (authToken && cookies) {
+        onLog(createLog('info', 'Token + Cookies 同时使用'));
       }
 
       const resp = await fetch(`${API_BASE_URL}/proxy/api/biz/subscription/list`, {

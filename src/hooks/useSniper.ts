@@ -121,7 +121,7 @@ export function useSniper(): UseSniperReturn {
       return;
     }
 
-    // 构建请求头：支持 Token 或 Cookies
+    // 构建请求头：支持 Token 和 Cookies 同时使用
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -129,9 +129,13 @@ export function useSniper(): UseSniperReturn {
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
       addLog(createLog('info', `[认证方式] Bearer Token`));
-    } else if (cookies) {
+    }
+    if (cookies) {
       headers['Cookie'] = cookies;
-      addLog(createLog('info', `[认证方式] Cookies`));
+      addLog(createLog('info', `[认证方式] + Cookies`));
+    }
+    if (authToken && cookies) {
+      addLog(createLog('info', `[认证方式] Token + Cookies 同时使用`));
     }
 
     try {
