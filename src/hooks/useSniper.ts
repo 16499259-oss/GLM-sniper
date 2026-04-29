@@ -147,9 +147,13 @@ export function useSniper(): UseSniperReturn {
       }
 
       // Step 2: Create pre-order
-      addLog(createLog('info', `[步骤2] 创建预订单...`));
+      addLog(createLog('info', '[步骤2] 创建预订单...'));
       const productId = getDefaultProductId(plan);
       addLog(createLog('info', `[步骤2] 使用产品ID: ${productId} (${PLANS[plan].name} 连续包季)`));
+
+      // 获取套餐价格（去掉¥和/月等后缀）
+      const priceStr = PLANS[plan].price.replace('¥', '').replace('/月', '').replace('/季', '').replace('/年', '');
+      const payPrice = parseInt(priceStr) * 100; // 转换为分
 
       const preOrderResp = await fetch(`${PROXY_BASE}/biz/product/createPreOrder`, {
         method: 'POST',
@@ -157,18 +161,26 @@ export function useSniper(): UseSniperReturn {
         body: JSON.stringify({
           productId,
           paymentType: 'alipay',
+          num: 1,            // 购买数量
+          isMobile: false,   // 是否为手机端
+          payPrice: payPrice, // 支付金额（分）
+          channelCode: 'ALIPAY_WEB', // 支付渠道编码
         }),
       });
 
-      if (!preOrderResp.ok) {
-        const errorText = await preOrderResp.text();
-        addLog(createLog('error', `[步骤2] 创建预订单失败: HTTP ${preOrderResp.status}`));
-        addLog(createLog('error', `[步骤2] 响应: ${errorText.slice(0, 200)}`));
+      const preOrderData = await preOrderResp.json();
+      addLog(createLog('info', `[步骤2] 预订单响应: ${JSON.stringify(preOrderData)}`));
+
+      // 检查业务层面的成功（code=200 或 success=true）
+      if (!preOrderResp.ok || preOrderData.code !== 200 || !preOrderData.success) {
+        const errorMsg = preOrderData.msg || `HTTP ${preOrderResp.status}`;
+        addLog(createLog('error', `[步骤2] 创建预订单失败: ${errorMsg}`));
 
         // 检测验证码相关错误
-        if (errorText.includes('captcha') || errorText.includes('验证') ||
-            errorText.includes('verify') || errorText.includes('Tencent') ||
-            errorText.includes('security') || preOrderResp.status === 403) {
+        if (errorMsg.includes('captcha') || errorMsg.includes('验证') ||
+            errorMsg.includes('verify') || errorMsg.includes('Tencent') ||
+            errorMsg.includes('安全验证') || errorMsg.includes('security') ||
+            preOrderResp.status === 403) {
           addLog(createLog('warning', '⚠️ 检测到验证码拦截！'));
           addLog(createLog('info', '正在打开浏览器窗口供您处理验证码...'));
           
@@ -208,8 +220,7 @@ export function useSniper(): UseSniperReturn {
         return;
       }
 
-      const preOrderData = await preOrderResp.json();
-      addLog(createLog('success', `[步骤2] 预订单创建成功!`));
+      addLog(createLog('success', '[步骤2] 预订单创建成功!'));
       addLog(createLog('info', `[步骤2] 订单数据: ${JSON.stringify(preOrderData).slice(0, 300)}`));
 
       // Step 3: Pay preview
