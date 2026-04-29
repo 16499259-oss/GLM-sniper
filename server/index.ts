@@ -253,7 +253,7 @@ app.post('/api/sniper/api', async (req: Request, res: Response) => {
     }
 
     const preOrderData = await preOrderResp.json();
-    console.log('[API Sniper] Pre-order created:', JSON.stringify(preOrderData).slice(0, 300));
+    console.log('[API Sniper] Pre-order created:', JSON.stringify(preOrderData));
 
     // Step 3: Pay preview
     console.log('[API Sniper] Step 3: Getting pay preview...');
@@ -273,7 +273,7 @@ app.post('/api/sniper/api', async (req: Request, res: Response) => {
     });
 
     const signData = await signResp.json();
-    console.log('[API Sniper] Sign response:', JSON.stringify(signData).slice(0, 300));
+    console.log('[API Sniper] Sign response:', JSON.stringify(signData));
 
     // Step 5: Check payment status
     let payStatus = null;

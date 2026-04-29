@@ -224,7 +224,7 @@ app.post('/api/sniper/api', async (req, res) => {
             });
         }
         const preOrderData = await preOrderResp.json();
-        console.log('[API Sniper] Pre-order created:', JSON.stringify(preOrderData).slice(0, 300));
+        console.log('[API Sniper] Pre-order created:', JSON.stringify(preOrderData));
         // Step 3: Pay preview
         console.log('[API Sniper] Step 3: Getting pay preview...');
         const previewResp = await fetch(`${BASE}/biz/pay/preview`, {
@@ -241,7 +241,7 @@ app.post('/api/sniper/api', async (req, res) => {
             body: JSON.stringify({ productId, paymentType }),
         });
         const signData = await signResp.json();
-        console.log('[API Sniper] Sign response:', JSON.stringify(signData).slice(0, 300));
+        console.log('[API Sniper] Sign response:', JSON.stringify(signData));
         // Step 5: Check payment status
         let payStatus = null;
         if (signData.data?.key) {
