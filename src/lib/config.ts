@@ -93,21 +93,24 @@ export const PAYMENT_METHODS: Record<PaymentMethod, { name: string; code: string
 export const DEFAULT_PAYMENT_METHOD: PaymentMethod = 'alipay';
 
 // 产品ID映射（根据套餐类型和支付周期）
+// 通过登录智谱官网后从 sessionStorage 获取
+// 来源: LOCAL_CODING_PACKAGE_DATA_CACHE
+
 export const PRODUCT_IDS: Record<PlanType, Record<string, string>> = {
   lite: {
-    monthly: 'product-lite-monthly',
-    quarterly: 'product-lite-quarterly',
-    yearly: 'product-lite-yearly',
+    monthly: 'product-02434c',    // Lite 月付 ¥49
+    quarterly: 'product-b8ea38',  // Lite 季付 ¥132.3
+    yearly: 'product-70a804',      // Lite 年付 ¥470.4
   },
   pro: {
-    monthly: 'product-a6ef45',   // Pro 月付
-    quarterly: 'product-1df3e1', // Pro 季付
-    yearly: 'product-fc5155',    // Pro 年付
+    monthly: 'product-1df3e1',    // Pro 月付 ¥149
+    quarterly: 'product-fef82f',   // Pro 季付 ¥402.3
+    yearly: 'product-5643e6',     // Pro 年付 ¥1430.4
   },
   max: {
-    monthly: 'product-max-monthly',
-    quarterly: 'product-2fc421', // Max 季付
-    yearly: 'product-max-yearly',
+    monthly: 'product-2fc421',    // Max 月付 ¥469
+    quarterly: 'product-5d3a03',  // Max 季付 ¥1266.3
+    yearly: 'product-d46f8b',     // Max 年付 ¥4502.4
   },
 };
 
