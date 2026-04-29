@@ -281,7 +281,12 @@ export function useSniper(): UseSniperReturn {
           }
         }
 
-        addLog(createLog('warning', `支付可能需要人工完成，请检查智谱AI平台确认订阅状态`));
+        // 检查是否有订单号
+        const orderNo = signData.data?.payOrderNo || signData.data?.orderNo || '';
+        const orderInfo = orderNo ? `\n  订单号: ${orderNo}` : '';
+        addLog(createLog('success', `✅ 订单已提交成功！请前往订单管理页面完成支付${orderInfo}`));
+        addLog(createLog('info', `📋 支付地址: https://open.bigmodel.cn/usercenter/overview`));
+        addLog(createLog('info', `💡 抢购工具只负责提交订单，支付需在智谱平台手动完成`));
         setStatus('success');
       } else {
         const errorText = await createSignResp.text();
