@@ -52,15 +52,15 @@ interface UseSniperReturn {
 }
 
 export function useSniper(): UseSniperReturn {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  // 获取当天的日期字符串（YYYY-MM-DD格式）
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
 
   const [mode, setMode] = useState<SniperMode>('api');
   const [plan, setPlan] = useState<PlanType>('pro');
   const [paymentCycle, setPaymentCycle] = useState<PaymentCycle>(DEFAULT_CYCLE);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(DEFAULT_PAYMENT_METHOD);
-  const [targetDate, setTargetDate] = useState(tomorrowStr);
+  const [targetDate, setTargetDate] = useState(todayStr);
   const [targetTime, setTargetTime] = useState('10:00');
   const [authToken, setAuthToken] = useState('');
   const [cookies, setCookies] = useState('');
