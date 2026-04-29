@@ -84,8 +84,8 @@ export const PAYMENT_CYCLES: Record<PaymentCycle, { name: string; discount: stri
 
 // 支付方式配置
 export const PAYMENT_METHODS: Record<PaymentMethod, { name: string; code: string; icon: string }> = {
-  alipay: { name: '支付宝', code: 'ALIPAY_WEB', icon: '💰' },
-  wechat: { name: '微信支付', code: 'WECHAT_WEB', icon: '📱' },
+  alipay: { name: '支付宝', code: 'ALI', icon: '💰' },
+  wechat: { name: '微信支付', code: 'WE_CHAT', icon: '📱' },
   balance: { name: '账户余额', code: 'BALANCE', icon: '🏦' },
 };
 
