@@ -346,7 +346,7 @@ export function useSniper(): UseSniperReturn {
         executeApiSniper();
       }
     }
-  }, [mode, plan, targetDate, targetTime, executeBrowserSniper, executeApiSniper, addLog, clearLogs]);
+  }, [mode, plan, paymentCycle, targetDate, targetTime, executeBrowserSniper, executeApiSniper, addLog, clearLogs]);
 
   const stop = useCallback(() => {
     abortedRef.current = true;
@@ -405,7 +405,7 @@ export function useSniper(): UseSniperReturn {
     } catch (err: any) {
       addLog(createLog('error', `库存检查异常: ${err.message}`));
     }
-  }, [plan, isMonitoring, authToken, addLog, executeApiSniper, stopMonitoring]);
+  }, [plan, paymentCycle, isMonitoring, authToken, addLog, executeApiSniper, stopMonitoring]);
 
   // 启动库存监控
   const startMonitoring = useCallback(() => {
