@@ -161,6 +161,7 @@ export function useSniper(): UseSniperReturn {
       const cycleNames = { monthly: '连续包月', quarterly: '连续包季', yearly: '连续包年' };
       addLog(createLog('info', `[步骤2] 产品ID: ${productId} (${PLANS[plan].name} ${cycleNames[paymentCycle]})`));
       addLog(createLog('info', `[步骤2] 支付金额: ${formatPrice(payPrice / 100)}元 (${payPrice}分)`));
+      addLog(createLog('info', `[步骤2] 支付方式: ${PAYMENT_METHODS[paymentMethod].name} (channelCode=${PAYMENT_METHODS[paymentMethod].code})`));
 
       const preOrderResp = await fetch(`${PROXY_BASE}/biz/product/createPreOrder`, {
         method: 'POST',
