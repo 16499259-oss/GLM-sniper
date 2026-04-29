@@ -5,15 +5,40 @@ export type { LogLevel, LogEntry };
 
 export type SniperMode = 'browser' | 'api';
 export type PlanType = 'lite' | 'pro' | 'max';
+export type PaymentCycle = 'monthly' | 'quarterly' | 'yearly';
 export type SniperStatus = 'idle' | 'countdown' | 'running' | 'captcha_pending' | 'success' | 'error';
 
 export interface PlanConfig {
   type: PlanType;
   name: string;
-  price: string;
-  productId: string;
+  monthlyPrice: number; // 月价（元）
   badge?: string;
 }
+
+// 根据支付周期计算实际价格
+export const calculatePrice = (plan: PlanType, cycle: PaymentCycle): number => {
+  const monthlyPrice = PLAN_PRICES[plan];
+  switch (cycle) {
+    case 'monthly':
+      return monthlyPrice;
+    case 'quarterly':
+      return monthlyPrice * 3 * 0.9; // 季度总价9折
+    case 'yearly':
+      return monthlyPrice * 12 * 0.8; // 年度总价8折
+  }
+};
+
+// 格式化价格显示
+export const formatPrice = (price: number): string => {
+  return `¥${price.toFixed(1)}`;
+};
+
+// 各套餐月价
+export const PLAN_PRICES: Record<PlanType, number> = {
+  lite: 49,
+  pro: 149,
+  max: 469,
+};
 
 export interface SniperConfig {
   mode: SniperMode;
@@ -33,23 +58,27 @@ export const PLANS: Record<PlanType, PlanConfig> = {
   lite: {
     type: 'lite',
     name: 'Lite',
-    price: '¥49/月',
-    productId: 'product-005',
+    monthlyPrice: 49,
   },
   pro: {
     type: 'pro',
     name: 'Pro',
-    price: '¥149/月',
-    productId: 'product-047',
+    monthlyPrice: 149,
     badge: '🔥 最受欢迎',
   },
   max: {
     type: 'max',
     name: 'Max',
-    price: '¥469/月',
-    productId: 'product-047',
+    monthlyPrice: 469,
     badge: '量大管饱',
   },
+};
+
+// 支付周期配置
+export const PAYMENT_CYCLES: Record<PaymentCycle, { name: string; discount: string }> = {
+  monthly: { name: '连续包月', discount: '' },
+  quarterly: { name: '连续包季', discount: '9折' },
+  yearly: { name: '连续包年', discount: '8折' },
 };
 
 // 产品ID映射（根据套餐类型和支付周期）
@@ -71,10 +100,13 @@ export const PRODUCT_IDS: Record<PlanType, Record<string, string>> = {
   },
 };
 
-// 获取默认产品ID（季付）
-export const getDefaultProductId = (plan: PlanType): string => {
-  return PRODUCT_IDS[plan]?.quarterly || PRODUCT_IDS.pro.quarterly;
+// 获取产品ID
+export const getProductId = (plan: PlanType, cycle: PaymentCycle): string => {
+  return PRODUCT_IDS[plan]?.[cycle] || PRODUCT_IDS.pro.quarterly;
 };
+
+// 默认支付周期
+export const DEFAULT_CYCLE: PaymentCycle = 'quarterly';
 // 库存检查相关配置
 export const STOCK_CHECK_IDS = {
   stockStatus: '1111',      // 库存状态

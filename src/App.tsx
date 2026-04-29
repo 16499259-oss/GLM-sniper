@@ -7,7 +7,7 @@ import { StockMonitor } from './components/StockMonitor';
 import { LogConsole } from './components/LogConsole';
 import { ControlBar } from './components/ControlBar';
 import { QuickGuide } from './components/QuickGuide';
-import { PLANS } from './lib/config';
+import { PLANS, calculatePrice, formatPrice } from './lib/config';
 
 function App() {
   const sniper = useSniper();
@@ -87,6 +87,8 @@ function App() {
               <PlanSelector
                 plan={sniper.plan}
                 onPlanChange={sniper.setPlan}
+                paymentCycle={sniper.paymentCycle}
+                onPaymentCycleChange={sniper.setPaymentCycle}
                 disabled={isRunning}
               />
             </div>
@@ -140,7 +142,7 @@ function App() {
                       GLM Coding Plan {PLANS[sniper.plan].name}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {PLANS[sniper.plan].price}
+                      {formatPrice(calculatePrice(sniper.plan, sniper.paymentCycle))}
                     </span>
                     {PLANS[sniper.plan].badge && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent">

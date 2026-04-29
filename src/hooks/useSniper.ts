@@ -2,10 +2,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type {
   SniperMode,
   PlanType,
+  PaymentCycle,
   SniperStatus,
   LogEntry,
 } from '../lib/config';
-import { PLANS, getDefaultProductId, API_BASE_URL } from '../lib/config';
+import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, API_BASE_URL } from '../lib/config';
 import { createLog, getTargetDateTime } from '../lib/utils';
 
 // 库存状态接口
@@ -21,6 +22,8 @@ interface UseSniperReturn {
   setMode: (m: SniperMode) => void;
   plan: PlanType;
   setPlan: (p: PlanType) => void;
+  paymentCycle: PaymentCycle;
+  setPaymentCycle: (c: PaymentCycle) => void;
   targetDate: string;
   setTargetDate: (d: string) => void;
   targetTime: string;
@@ -52,6 +55,7 @@ export function useSniper(): UseSniperReturn {
 
   const [mode, setMode] = useState<SniperMode>('api');
   const [plan, setPlan] = useState<PlanType>('pro');
+  const [paymentCycle, setPaymentCycle] = useState<PaymentCycle>(DEFAULT_CYCLE);
   const [targetDate, setTargetDate] = useState(tomorrowStr);
   const [targetTime, setTargetTime] = useState('10:00');
   const [authToken, setAuthToken] = useState('');
@@ -148,12 +152,11 @@ export function useSniper(): UseSniperReturn {
 
       // Step 2: Create pre-order
       addLog(createLog('info', '[步骤2] 创建预订单...'));
-      const productId = getDefaultProductId(plan);
-      addLog(createLog('info', `[步骤2] 使用产品ID: ${productId} (${PLANS[plan].name} 连续包季)`));
-
-      // 获取套餐价格（去掉¥和/月等后缀）
-      const priceStr = PLANS[plan].price.replace('¥', '').replace('/月', '').replace('/季', '').replace('/年', '');
-      const payPrice = parseInt(priceStr) * 100; // 转换为分
+      const productId = getProductId(plan, paymentCycle);
+      const payPrice = calculatePrice(plan, paymentCycle) * 100; // 转换为分
+      const cycleNames = { monthly: '连续包月', quarterly: '连续包季', yearly: '连续包年' };
+      addLog(createLog('info', `[步骤2] 产品ID: ${productId} (${PLANS[plan].name} ${cycleNames[paymentCycle]})`));
+      addLog(createLog('info', `[步骤2] 支付金额: ${formatPrice(payPrice / 100)}元 (${payPrice}分)`));
 
       const preOrderResp = await fetch(`${PROXY_BASE}/biz/product/createPreOrder`, {
         method: 'POST',
@@ -299,7 +302,8 @@ export function useSniper(): UseSniperReturn {
     addLog(createLog('info', '═══════════════════════════════════════'));
     addLog(createLog('info', '  GLM Coding Plan Sniper 启动'));
     addLog(createLog('info', `  模式: ${mode === 'browser' ? '浏览器自动化' : 'API 高速'}`));
-    addLog(createLog('info', `  套餐: ${PLANS[plan].name} (${PLANS[plan].price})`));
+        const cycleNames = { monthly: '连续包月', quarterly: '连续包季', yearly: '连续包年' };
+        addLog(createLog('info', `  套餐: ${PLANS[plan].name} ${cycleNames[paymentCycle]} (${formatPrice(calculatePrice(plan, paymentCycle))})`));
     addLog(createLog('info', `  目标时间: ${targetDate} ${targetTime}`));
     addLog(createLog('info', '═══════════════════════════════════════'));
 
@@ -445,6 +449,7 @@ export function useSniper(): UseSniperReturn {
   return {
     mode, setMode,
     plan, setPlan,
+    paymentCycle, setPaymentCycle,
     targetDate, setTargetDate,
     targetTime, setTargetTime,
     authToken, setAuthToken,
