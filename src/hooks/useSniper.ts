@@ -300,7 +300,7 @@ export function useSniper(): UseSniperReturn {
       addLog(createLog('warning', `请确保后端服务已启动: npm run server`));
       setStatus('error');
     }
-  }, [plan, authToken, addLog]);
+  }, [plan, paymentCycle, authToken, cookies, addLog]);
 
   // Main start function
   const start = useCallback(() => {
