@@ -3,10 +3,11 @@ import type {
   SniperMode,
   PlanType,
   PaymentCycle,
+  PaymentMethod,
   SniperStatus,
   LogEntry,
 } from '../lib/config';
-import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, API_BASE_URL } from '../lib/config';
+import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL } from '../lib/config';
 import { createLog, getTargetDateTime } from '../lib/utils';
 
 // 库存状态接口
@@ -24,6 +25,8 @@ interface UseSniperReturn {
   setPlan: (p: PlanType) => void;
   paymentCycle: PaymentCycle;
   setPaymentCycle: (c: PaymentCycle) => void;
+  paymentMethod: PaymentMethod;
+  setPaymentMethod: (m: PaymentMethod) => void;
   targetDate: string;
   setTargetDate: (d: string) => void;
   targetTime: string;
@@ -56,6 +59,7 @@ export function useSniper(): UseSniperReturn {
   const [mode, setMode] = useState<SniperMode>('api');
   const [plan, setPlan] = useState<PlanType>('pro');
   const [paymentCycle, setPaymentCycle] = useState<PaymentCycle>(DEFAULT_CYCLE);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(DEFAULT_PAYMENT_METHOD);
   const [targetDate, setTargetDate] = useState(tomorrowStr);
   const [targetTime, setTargetTime] = useState('10:00');
   const [authToken, setAuthToken] = useState('');
@@ -163,11 +167,11 @@ export function useSniper(): UseSniperReturn {
         headers,
         body: JSON.stringify({
           productId,
-          paymentType: 'alipay',
+          paymentType: paymentMethod,
           num: 1,            // 购买数量
           isMobile: false,   // 是否为手机端
           payPrice: payPrice, // 支付金额（分）
-          channelCode: 'ALIPAY_WEB', // 支付渠道编码
+          channelCode: PAYMENT_METHODS[paymentMethod].code, // 支付渠道编码
         }),
       });
 
@@ -231,7 +235,7 @@ export function useSniper(): UseSniperReturn {
       const payPreviewResp = await fetch(`${PROXY_BASE}/biz/pay/preview`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ productId, paymentType: 'alipay' }),
+        body: JSON.stringify({ productId, paymentType: paymentMethod }),
       });
 
       if (payPreviewResp.ok) {
@@ -247,7 +251,7 @@ export function useSniper(): UseSniperReturn {
       const createSignResp = await fetch(`${PROXY_BASE}/biz/pay/create-sign`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ productId, paymentType: 'alipay' }),
+        body: JSON.stringify({ productId, paymentType: paymentMethod }),
       });
 
       if (createSignResp.ok) {
@@ -450,6 +454,7 @@ export function useSniper(): UseSniperReturn {
     mode, setMode,
     plan, setPlan,
     paymentCycle, setPaymentCycle,
+    paymentMethod, setPaymentMethod,
     targetDate, setTargetDate,
     targetTime, setTargetTime,
     authToken, setAuthToken,

@@ -6,6 +6,7 @@ export type { LogLevel, LogEntry };
 export type SniperMode = 'browser' | 'api';
 export type PlanType = 'lite' | 'pro' | 'max';
 export type PaymentCycle = 'monthly' | 'quarterly' | 'yearly';
+export type PaymentMethod = 'alipay' | 'wechat' | 'balance';
 export type SniperStatus = 'idle' | 'countdown' | 'running' | 'captcha_pending' | 'success' | 'error';
 
 export interface PlanConfig {
@@ -80,6 +81,16 @@ export const PAYMENT_CYCLES: Record<PaymentCycle, { name: string; discount: stri
   quarterly: { name: '连续包季', discount: '9折' },
   yearly: { name: '连续包年', discount: '8折' },
 };
+
+// 支付方式配置
+export const PAYMENT_METHODS: Record<PaymentMethod, { name: string; code: string; icon: string }> = {
+  alipay: { name: '支付宝', code: 'ALIPAY_WEB', icon: '💰' },
+  wechat: { name: '微信支付', code: 'WECHAT_WEB', icon: '📱' },
+  balance: { name: '账户余额', code: 'BALANCE', icon: '🏦' },
+};
+
+// 默认支付方式
+export const DEFAULT_PAYMENT_METHOD: PaymentMethod = 'alipay';
 
 // 产品ID映射（根据套餐类型和支付周期）
 export const PRODUCT_IDS: Record<PlanType, Record<string, string>> = {

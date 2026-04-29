@@ -1,6 +1,7 @@
 import { useSniper } from './hooks/useSniper';
 import { ModeSwitcher } from './components/ModeSwitcher';
 import { PlanSelector } from './components/PlanSelector';
+import { PaymentMethodSelector } from './components/PaymentMethodSelector';
 import { TimerConfig } from './components/TimerConfig';
 import { AuthPanel } from './components/AuthPanel';
 import { StockMonitor } from './components/StockMonitor';
@@ -89,6 +90,11 @@ function App() {
                 onPlanChange={sniper.setPlan}
                 paymentCycle={sniper.paymentCycle}
                 onPaymentCycleChange={sniper.setPaymentCycle}
+                disabled={isRunning}
+              />
+              <PaymentMethodSelector
+                paymentMethod={sniper.paymentMethod}
+                onPaymentMethodChange={sniper.setPaymentMethod}
                 disabled={isRunning}
               />
             </div>
