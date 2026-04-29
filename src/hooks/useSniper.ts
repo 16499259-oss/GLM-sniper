@@ -228,7 +228,7 @@ export function useSniper(): UseSniperReturn {
       }
 
       addLog(createLog('success', '[步骤2] 预订单创建成功!'));
-      addLog(createLog('info', `[步骤2] 订单数据: ${JSON.stringify(preOrderData).slice(0, 300)}`));
+      addLog(createLog('info', `[步骤2] 订单数据: ${JSON.stringify(preOrderData)}`));
 
       // Step 3: Pay preview
       addLog(createLog('info', `[步骤3] 获取支付预览...`));
@@ -241,7 +241,7 @@ export function useSniper(): UseSniperReturn {
       if (payPreviewResp.ok) {
         const previewData = await payPreviewResp.json();
         addLog(createLog('success', `[步骤3] 支付预览获取成功`));
-        addLog(createLog('info', `[步骤3] 预览数据: ${JSON.stringify(previewData).slice(0, 300)}`));
+        addLog(createLog('info', `[步骤3] 预览数据: ${JSON.stringify(previewData)}`));
       } else {
         addLog(createLog('warning', `[步骤3] 支付预览获取失败，继续下一步...`));
       }
@@ -257,7 +257,7 @@ export function useSniper(): UseSniperReturn {
       if (createSignResp.ok) {
         const signData = await createSignResp.json();
         addLog(createLog('success', `[步骤4] 签约请求已发送!`));
-        addLog(createLog('info', `[步骤4] 签约数据: ${JSON.stringify(signData).slice(0, 300)}`));
+        addLog(createLog('info', `[步骤4] 签约数据: ${JSON.stringify(signData)}`));
 
         // Check payment status
         if (signData.data?.key || signData.data?.payOrderNo) {
@@ -271,7 +271,7 @@ export function useSniper(): UseSniperReturn {
 
           if (statusResp.ok) {
             const statusData = await statusResp.json();
-            addLog(createLog('info', `[步骤5] 支付状态: ${JSON.stringify(statusData).slice(0, 200)}`));
+            addLog(createLog('info', `[步骤5] 支付状态: ${JSON.stringify(statusData)}`));
 
             if (statusData.data?.status === 'SUCCESS' || statusData.data?.tradeStatus === 'SUCCESS') {
               addLog(createLog('success', `🎉 抢购成功！GLM Coding Plan ${PLANS[plan].name} 已订阅！`));
@@ -291,7 +291,7 @@ export function useSniper(): UseSniperReturn {
       } else {
         const errorText = await createSignResp.text();
         addLog(createLog('error', `[步骤4] 签约失败: HTTP ${createSignResp.status}`));
-        addLog(createLog('error', `[步骤4] 响应: ${errorText.slice(0, 200)}`));
+        addLog(createLog('error', `[步骤4] 响应: ${errorText}`));
         setStatus('error');
       }
 
