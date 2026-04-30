@@ -7,7 +7,7 @@ import type {
   SniperStatus,
   LogEntry,
 } from '../lib/config';
-import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL } from '../lib/config';
+import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL, RESOURCE_PACKS } from '../lib/config';
 import { createLog, getTargetDateTime } from '../lib/utils';
 
 // 库存状态接口
@@ -173,6 +173,7 @@ export function useSniper(): UseSniperReturn {
           isMobile: false,   // 是否为手机端
           payPrice: payPrice, // 支付金额（分）
           channelCode: PAYMENT_METHODS[paymentMethod].code, // 支付渠道编码
+          relateResourcePackList: RESOURCE_PACKS[productId] || [], // 关联资源包
         }),
       });
 
