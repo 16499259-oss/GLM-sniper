@@ -7,7 +7,7 @@ import type {
   SniperStatus,
   LogEntry,
 } from '../lib/config';
-import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL, RESOURCE_PACKS } from '../lib/config';
+import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL } from '../lib/config';
 import { createLog, getTargetDateTime } from '../lib/utils';
 
 // 库存状态接口
@@ -157,26 +157,23 @@ export function useSniper(): UseSniperReturn {
       // Step 2: Create pre-order
       addLog(createLog('info', '[步骤2] 创建预订单...'));
       const productId = getProductId(plan, paymentCycle);
-      const payPrice = calculatePrice(plan, paymentCycle) * 100; // 转换为分
+      const payPrice = calculatePrice(plan, paymentCycle); // 单位：元（API要求）
       const cycleNames = { monthly: '连续包月', quarterly: '连续包季', yearly: '连续包年' };
       addLog(createLog('info', `[步骤2] 产品ID: ${productId} (${PLANS[plan].name} ${cycleNames[paymentCycle]})`));
-      addLog(createLog('info', `[步骤2] 支付金额: ${formatPrice(payPrice / 100)}元 (${payPrice}分)`));
+      addLog(createLog('info', `[步骤2] 支付金额: ¥${payPrice}元`));
       addLog(createLog('info', `[步骤2] 支付方式: ${PAYMENT_METHODS[paymentMethod].name} (channelCode=${PAYMENT_METHODS[paymentMethod].code})`));
 
-      // 构建请求体
+      // 构建请求体（根据智谱API正确格式）
       const requestBody = {
         productId,
-        paymentType: paymentMethod,
         num: 1,
-        isMobile: false,
         payPrice: payPrice,
+        isMobile: false,
         channelCode: PAYMENT_METHODS[paymentMethod].code,
-        relateResourcePackList: RESOURCE_PACKS[productId] || [],
       };
       
       // 打印完整请求参数（调试）
       addLog(createLog('info', `[步骤2] 完整请求体: ${JSON.stringify(requestBody)}`));
-      addLog(createLog('info', `[步骤2] relateResourcePackList: ${JSON.stringify(RESOURCE_PACKS[productId] || [])}`));
 
       const preOrderResp = await fetch(`${PROXY_BASE}/biz/product/createPreOrder`, {
         method: 'POST',

@@ -84,9 +84,9 @@ export const PAYMENT_CYCLES: Record<PaymentCycle, { name: string; discount: stri
 
 // 支付方式配置
 export const PAYMENT_METHODS: Record<PaymentMethod, { name: string; code: string; icon: string }> = {
-  alipay: { name: '支付宝', code: '1', icon: '💰' },  // channelCode使用数字索引
-  wechat: { name: '微信支付', code: '2', icon: '📱' },  // channelCode使用数字索引
-  balance: { name: '账户余额', code: '0', icon: '🏦' },  // channelCode使用数字索引
+  alipay: { name: '支付宝', code: 'ALIPAY', icon: '💰' },
+  wechat: { name: '微信支付', code: 'WECHAT', icon: '📱' },
+  balance: { name: '账户余额', code: 'BALANCE', icon: '🏦' },
 };
 
 // 默认支付方式
@@ -114,21 +114,20 @@ export const PRODUCT_IDS: Record<PlanType, Record<string, string>> = {
   },
 };
 
-// 产品关联的资源包映射（relateResourcePackList）
-// 每个产品购买时需要指定关联的资源包
+// 产品关联的资源包映射（用于信息展示，createPreOrder不需要此参数）
 export const RESOURCE_PACKS: Record<string, string[]> = {
   // Lite 套餐
-  'product-02434c': ['bundle_951', 'bundle_828'],  // Lite 月付
-  'product-b8ea38': ['bundle_954', 'bundle_830'],  // Lite 季付
-  'product-70a804': ['bundle_956', 'bundle_832'],  // Lite 年付
+  'product-02434c': ['bundle_820', 'bundle_944'],  // Lite 月付
+  'product-b8ea38': ['bundle_950', 'bundle_826'],  // Lite 季付
+  'product-70a804': ['bundle_832', 'bundle_956'],  // Lite 年付
   // Pro 套餐
   'product-1df3e1': ['bundle_946', 'bundle_822'],  // Pro 月付
-  'product-fef82f': ['bundle_955', 'bundle_831'],  // Pro 季付
-  'product-5643e6': ['bundle_958', 'bundle_834'],  // Pro 年付
+  'product-fef82f': ['bundle_952', 'bundle_828'],  // Pro 季付
+  'product-5643e6': ['bundle_834', 'bundle_958'],  // Pro 年付
   // Max 套餐
-  'product-2fc421': ['bundle_949', 'bundle_825'],  // Max 月付
-  'product-5d3a03': ['bundle_954', 'bundle_830'],  // Max 季付（推测）
-  'product-d46f8b': ['bundle_960', 'bundle_836'],  // Max 年付
+  'product-2fc421': ['bundle_948', 'bundle_824'],  // Max 月付
+  'product-5d3a03': ['bundle_830', 'bundle_954'],  // Max 季付
+  'product-d46f8b': ['bundle_836', 'bundle_960'],  // Max 年付
 };
 
 // 获取产品ID
