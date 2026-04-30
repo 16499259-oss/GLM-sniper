@@ -7,7 +7,7 @@ import type {
   SniperStatus,
   LogEntry,
 } from '../lib/config';
-import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL } from '../lib/config';
+import { PLANS, getProductId, calculatePrice, formatPrice, DEFAULT_CYCLE, DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS, API_BASE_URL, RESOURCE_PACKS } from '../lib/config';
 import { createLog, getTargetDateTime } from '../lib/utils';
 
 // 库存状态接口
@@ -170,10 +170,12 @@ export function useSniper(): UseSniperReturn {
         payPrice: payPrice,
         isMobile: false,
         channelCode: PAYMENT_METHODS[paymentMethod].code,
+        relateResourcePackList: RESOURCE_PACKS[productId] || [],
       };
       
       // 打印完整请求参数（调试）
       addLog(createLog('info', `[步骤2] 完整请求体: ${JSON.stringify(requestBody)}`));
+      addLog(createLog('info', `[步骤2] relateResourcePackList: ${JSON.stringify(RESOURCE_PACKS[productId] || [])}`));
 
       const preOrderResp = await fetch(`${PROXY_BASE}/biz/product/createPreOrder`, {
         method: 'POST',

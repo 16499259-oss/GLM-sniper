@@ -9,6 +9,13 @@
 - [src/App.tsx](file://src/App.tsx)
 </cite>
 
+## 更新摘要
+**变更内容**
+- 更新了API请求参数结构，移除了paymentType字段
+- 更新了createPreOrder请求体结构，新增channelCode和payPrice字段
+- 支付金额单位从fen改为yuan
+- 更新了支付方式映射关系
+
 ## 目录
 1. [简介](#简介)
 2. [项目结构](#项目结构)
@@ -22,7 +29,7 @@
 10. [附录](#附录)
 
 ## 简介
-本文件为“API模式抢购API”的完整技术文档，聚焦于后端服务中的 POST /api/sniper/api 接口。该接口通过直接调用智谱开放平台的业务接口，实现“限量检查-预订单创建-支付预览-签名生成-支付状态检查”五步抢购流程，无需浏览器自动化即可完成高速抢购。文档详细说明了请求参数、响应结构、错误处理机制、支持的支付方式与套餐映射关系，并提供使用示例与最佳实践建议。
+本文件为"API模式抢购API"的完整技术文档，聚焦于后端服务中的 POST /api/sniper/api 接口。该接口通过直接调用智谱开放平台的业务接口，实现"限量检查-预订单创建-支付预览-签名生成-支付状态检查"五步抢购流程，无需浏览器自动化即可完成高速抢购。文档详细说明了请求参数、响应结构、错误处理机制、支持的支付方式与套餐映射关系，并提供使用示例与最佳实践建议。
 
 ## 项目结构
 该项目采用前后端分离架构：
@@ -56,12 +63,12 @@ BE_Server --> BE_Stock
 BE_Server --> BE_Browser
 ```
 
-图表来源
+**图表来源**
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
 - [src/hooks/useSniper.ts:110-248](file://src/hooks/useSniper.ts#L110-L248)
 - [src/lib/config.ts:51-101](file://src/lib/config.ts#L51-L101)
 
-章节来源
+**章节来源**
 - [server/index.ts:1-370](file://server/index.ts#L1-L370)
 - [src/hooks/useSniper.ts:1-407](file://src/hooks/useSniper.ts#L1-L407)
 - [src/lib/config.ts:1-104](file://src/lib/config.ts#L1-L104)
@@ -72,7 +79,7 @@ BE_Server --> BE_Browser
 - 前端钩子 useSniper：负责组装请求参数、执行五步流程、处理错误与重试、记录日志。
 - 配置模块 config：定义计划类型、产品ID映射、API端点常量等。
 
-章节来源
+**章节来源**
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
 - [src/hooks/useSniper.ts:110-248](file://src/hooks/useSniper.ts#L110-L248)
 - [src/lib/config.ts:51-101](file://src/lib/config.ts#L51-L101)
@@ -99,7 +106,7 @@ BigModel-->>Server : 支付状态
 Server-->>Client : 聚合步骤结果
 ```
 
-图表来源
+**图表来源**
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
 
 ## 详细组件分析
@@ -112,7 +119,7 @@ Server-->>Client : 聚合步骤结果
   - plan: 字符串，目标套餐标识，支持 "pro"、"lite"、"max"。注意：后端内部会基于 plan 生成产品ID映射（如 "pro-quarterly"），若传入其他值将回退到默认 "pro-quarterly"。
   - authToken: 字符串，必填。用于访问智谱开放平台业务接口的认证令牌。
   - targetTime: 字符串，ISO8601格式的时间字符串（例如 "2025-01-01T10:00:00Z"）。后端会计算与当前时间的差值，提前约2秒触发请求以补偿网络延迟。
-  - paymentType: 字符串，支付方式，默认值为 "alipay"。当前前端实现固定使用 "alipay"，但后端接口允许传入该参数。
+  - paymentType: 字符串，支付方式，默认值为 "alipay"。**注意：此字段已在前端实现中移除，后端仍保留兼容性支持**。
 - 成功响应
   - success: 布尔值，true 表示整体流程成功。
   - steps: 对象，包含以下字段：
@@ -127,7 +134,7 @@ Server-->>Client : 聚合步骤结果
   - status: 数字，HTTP状态码
   - error: 字符串，错误详情（来自平台接口的原始文本）
 
-章节来源
+**章节来源**
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
 
 ### 五步抢购流程详解
@@ -162,10 +169,10 @@ HasKey --> |否| Done["结束"]
 Status --> Done
 ```
 
-图表来源
+**图表来源**
 - [server/index.ts:172-246](file://server/index.ts#L172-L246)
 
-章节来源
+**章节来源**
 - [server/index.ts:172-246](file://server/index.ts#L172-L246)
 
 ### 错误处理机制
@@ -178,7 +185,7 @@ Status --> Done
 - 网络异常
   - 任何步骤抛出异常时，统一返回 500 并包含错误消息。
 
-章节来源
+**章节来源**
 - [server/index.ts:196-204](file://server/index.ts#L196-L204)
 - [src/hooks/useSniper.ts:157-177](file://src/hooks/useSniper.ts#L157-L177)
 - [src/hooks/useSniper.ts:243-247](file://src/hooks/useSniper.ts#L243-L247)
@@ -186,11 +193,13 @@ Status --> Done
 ### 支付方式与套餐映射
 - 支付方式
   - paymentType：当前默认 "alipay"，接口允许传入该参数。
+  - **注意**：前端实现已更新为使用 channelCode 和 payPrice 参数，而非 paymentType。
 - 套餐映射
   - 后端内部使用 productIdMap 将 plan 与产品ID关联，支持 "pro-quarterly"、"lite-quarterly"、"max-quarterly" 等。
   - 若传入的 plan 不在映射表中，将回退到默认 "pro-quarterly"。
 - 前端产品ID映射
-  - 前端还维护了 PRODUCT_IDS，包含 monthly、quarterly、yearly 三种周期的产品ID映射，用于默认选择“连续包季”。
+  - 前端还维护了 PRODUCT_IDS，包含 monthly、quarterly、yearly 三种周期的产品ID映射，用于默认选择"连续包季"。
+  - 支付金额单位为元（yuan），而非之前的分（fen）。
 
 ```mermaid
 classDiagram
@@ -213,21 +222,29 @@ class RequestParams {
 +authToken : "Bearer ..."
 +targetTime : "ISO8601"
 }
+class FrontendCreateOrderParams {
++productId : "product-xxxxxx"
++num : 1
++payPrice : number (元)
++isMobile : boolean
++channelCode : "ALIPAY|WECHAT|BALANCE"
+}
 RequestParams --> ProductMapping : "生成 productId"
 RequestParams --> FrontendMapping : "默认选择季度"
+FrontendCreateOrderParams --> RequestParams : "转换为后端格式"
 ```
 
-图表来源
+**图表来源**
 - [server/index.ts:180-189](file://server/index.ts#L180-L189)
 - [src/lib/config.ts:52-68](file://src/lib/config.ts#L52-L68)
 
-章节来源
+**章节来源**
 - [server/index.ts:180-189](file://server/index.ts#L180-L189)
 - [src/lib/config.ts:52-68](file://src/lib/config.ts#L52-L68)
 
 ### 前端集成与最佳实践
 - 认证信息管理
-  - 前端提供认证面板，支持显示/隐藏 Token，点击“验证 Token”可调用后端代理接口验证有效性。
+  - 前端提供认证面板，支持显示/隐藏 Token，点击"验证 Token"可调用后端代理接口验证有效性。
 - 抢购流程控制
   - 前端 useSniper 钩子负责组装请求参数、执行五步流程、记录日志、处理错误与重试。
 - 时间控制
@@ -236,8 +253,9 @@ RequestParams --> FrontendMapping : "默认选择季度"
   - 使用 HTTPS 与正确的 Bearer Token。
   - 在限量阶段前准备好认证信息，避免因网络波动导致失败。
   - 若遇到验证码拦截，先在官网完成验证码再重试。
+- **重要更新**：前端已更新为使用 channelCode 和 payPrice 参数，支付金额单位为元（yuan）。
 
-章节来源
+**章节来源**
 - [src/components/AuthPanel.tsx:18-41](file://src/components/AuthPanel.tsx#L18-L41)
 - [src/hooks/useSniper.ts:251-293](file://src/hooks/useSniper.ts#L251-L293)
 - [src/App.tsx:116-126](file://src/App.tsx#L116-L126)
@@ -264,11 +282,11 @@ FE --> Auth["认证面板"]
 FE --> Config["配置模块"]
 ```
 
-图表来源
+**图表来源**
 - [src/hooks/useSniper.ts:110-248](file://src/hooks/useSniper.ts#L110-L248)
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
 
-章节来源
+**章节来源**
 - [src/hooks/useSniper.ts:110-248](file://src/hooks/useSniper.ts#L110-L248)
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
 
@@ -290,14 +308,15 @@ FE --> Config["配置模块"]
   - 若签名返回 key，后端会自动查询支付状态；若长时间未更新，可在平台侧查看订单状态。
 - CORS错误
   - 使用后端 /proxy/* 代理转发请求，避免跨域问题。
+- **新增问题**：如果遇到支付金额相关错误，检查是否使用了正确的元（yuan）单位而非分（fen）。
 
-章节来源
+**章节来源**
 - [src/hooks/useSniper.ts:157-177](file://src/hooks/useSniper.ts#L157-L177)
 - [src/hooks/useSniper.ts:212-232](file://src/hooks/useSniper.ts#L212-L232)
 - [server/index.ts:196-204](file://server/index.ts#L196-L204)
 
 ## 结论
-POST /api/sniper/api 提供了高效、稳定的 API 模式抢购能力，通过五步流程与完善的错误处理机制，能够在限时抢购场景下显著提升成功率。配合前端的认证管理、时间控制与日志系统，用户可以更便捷地完成抢购任务。建议在生产环境中持续关注平台接口变更与验证码策略调整，以维持最佳体验。
+POST /api/sniper/api 提供了高效、稳定的 API 模式抢购能力，通过五步流程与完善的错误处理机制，能够在限时抢购场景下显著提升成功率。配合前端的认证管理、时间控制与日志系统，用户可以更便捷地完成抢购任务。**需要注意的是，前端已更新为使用新的参数结构（channelCode、payPrice）和元（yuan）单位，后端仍保留paymentType兼容性支持**。建议在生产环境中持续关注平台接口变更与验证码策略调整，以维持最佳体验。
 
 ## 附录
 
@@ -310,7 +329,7 @@ POST /api/sniper/api 提供了高效、稳定的 API 模式抢购能力，通过
     - plan: "pro"
     - authToken: "<你的认证Token>"
     - targetTime: "2025-01-01T10:00:00Z"
-    - paymentType: "alipay"
+    - paymentType: "alipay"（可选，后端兼容支持）
 - 成功响应示例
   - success: true
   - steps:
@@ -320,5 +339,16 @@ POST /api/sniper/api 提供了高效、稳定的 API 模式抢购能力，通过
     - sign: {...}
     - payStatus: {...}
 
-章节来源
+**章节来源**
 - [server/index.ts:161-250](file://server/index.ts#L161-L250)
+
+### 参数变更说明
+- **paymentType 字段**：后端仍保留此字段以保持向后兼容，但前端实现已不再使用
+- **createPreOrder 请求体**：已更新为包含 channelCode 和 payPrice 字段
+- **支付金额单位**：从 fen（分）改为 yuan（元）
+- **新参数结构**：
+  - productId: 产品ID
+  - num: 数量（通常为1）
+  - payPrice: 支付金额（元）
+  - isMobile: 是否移动端
+  - channelCode: 支付渠道代码（ALIPAY、WECHAT、BALANCE）
