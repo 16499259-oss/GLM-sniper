@@ -163,18 +163,25 @@ export function useSniper(): UseSniperReturn {
       addLog(createLog('info', `[步骤2] 支付金额: ${formatPrice(payPrice / 100)}元 (${payPrice}分)`));
       addLog(createLog('info', `[步骤2] 支付方式: ${PAYMENT_METHODS[paymentMethod].name} (channelCode=${PAYMENT_METHODS[paymentMethod].code})`));
 
+      // 构建请求体
+      const requestBody = {
+        productId,
+        paymentType: paymentMethod,
+        num: 1,
+        isMobile: false,
+        payPrice: payPrice,
+        channelCode: PAYMENT_METHODS[paymentMethod].code,
+        relateResourcePackList: RESOURCE_PACKS[productId] || [],
+      };
+      
+      // 打印完整请求参数（调试）
+      addLog(createLog('info', `[步骤2] 完整请求体: ${JSON.stringify(requestBody)}`));
+      addLog(createLog('info', `[步骤2] relateResourcePackList: ${JSON.stringify(RESOURCE_PACKS[productId] || [])}`));
+
       const preOrderResp = await fetch(`${PROXY_BASE}/biz/product/createPreOrder`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          productId,
-          paymentType: paymentMethod,
-          num: 1,            // 购买数量
-          isMobile: false,   // 是否为手机端
-          payPrice: payPrice, // 支付金额（分）
-          channelCode: PAYMENT_METHODS[paymentMethod].code, // 支付渠道编码
-          relateResourcePackList: RESOURCE_PACKS[productId] || [], // 关联资源包
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const preOrderData = await preOrderResp.json();
