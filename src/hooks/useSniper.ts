@@ -170,7 +170,7 @@ export function useSniper(): UseSniperReturn {
         payPrice: payPrice,
         isMobile: false,
         channelCode: PAYMENT_METHODS[paymentMethod].code,
-        relateResourcePackList: RESOURCE_PACKS[productId] || [],
+        relateResourcePackList: [], // 空数组，不传具体资源包ID
       };
       
       // 打印完整请求参数（调试）
